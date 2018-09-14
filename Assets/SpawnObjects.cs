@@ -7,21 +7,21 @@ public class SpawnObjects : MonoBehaviour {
     public   int GoNum = 25;
     [Tooltip("显示八叉树分割空间")]
     public bool isShowQctreeBox;
-    List<GameObject> listGo = new List<GameObject>();
+    List<ModelObject> listGo = new List<ModelObject>();
 
-    QctreeNode root;
+    QctreeNode<ModelObject> root;
 
     Bounds queryBound;
     Vector3 queryCenter;
-    List<GameObject> listOrder;
+    List<ModelObject> listOrder;
     // Use this for initialization
     void Start () {
         
         Spawns();
 
-        root = new QctreeNode(new Bounds(Vector3.zero, new Vector3(100, 100, 100)));
+        root = new QctreeNode<ModelObject>(new Bounds(Vector3.zero, new Vector3(100, 100, 100)));
 
-        foreach (GameObject g in listGo)
+        foreach (ModelObject g in listGo)
         {
             root.Insert(g);
         }
@@ -44,29 +44,27 @@ public class SpawnObjects : MonoBehaviour {
             Vector3 p = new Vector3(Random.Range(-50, 50), Random.Range(-50, 50), Random.Range(-50, 50));
             GameObject tmpGo = Instantiate(go, p, Quaternion.identity);
             tmpGo.name += i.ToString();
-            listGo.Add(tmpGo);        
+
+            listGo.Add( new ModelObject(tmpGo));        
         }
 
     }
 
-    List<GameObject> goList;
+    List<ModelObject> goList;
     void unLoadNotInside(Bounds bds)
     {
         if (goList == null) return;
-        foreach(GameObject g in goList)
+        foreach(ModelObject g in goList)
         {
-            if(!bds.Contains(g.transform.position))
+            if(!bds.Contains(g.bounds.center))
             {
-                g.GetComponent<MeshRenderer>().material.color = Color.white;
+                g.m_gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
             }
         }
     }
   void loadGo()
     {
-        foreach (GameObject g in listGo)
-        {
-
-        }
+ 
     }
 
     // Update is called once per frame
@@ -90,9 +88,9 @@ public class SpawnObjects : MonoBehaviour {
            
            goList = root.QueryInBounds(queryBound);
             
-            foreach(GameObject g in goList)
+            foreach(ModelObject g in goList)
             {
-                g.GetComponent<MeshRenderer>().material.color = Color.red;
+                g.m_gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
             }
 
             
@@ -100,9 +98,9 @@ public class SpawnObjects : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            foreach (GameObject g in root.gameObjectsList)
+            foreach (ModelObject g in root.gameObjectsList)
             {
-                Debug.Log(g.name);
+                Debug.Log(g.m_gameObject.name);
             }
 
         }
@@ -126,28 +124,28 @@ public class SpawnObjects : MonoBehaviour {
         if(listOrder != null)
         {
             Gizmos.color = Color.blue;
-            foreach (GameObject g in listOrder)
+            foreach (ModelObject g in listOrder)
             {
-                Gizmos.DrawWireCube(g.transform.position, g.GetComponent<Renderer>().bounds.size);
+                Gizmos.DrawWireCube(g.bounds.center, g.bounds.size);
             }
         }
 
         if(isShowQctreeBox) DrawDebug(root);
     }
 
-    void DrawDebug(QctreeNode nodeTree)
+    void DrawDebug(QctreeNode<ModelObject> nodeTree)
     {
         if (nodeTree == null) return;
         Gizmos.color = Color.cyan;
         if (nodeTree.childNodes == null) return;
-        foreach (QctreeNode node in nodeTree.childNodes)
+        foreach (QctreeNode<ModelObject> node in nodeTree.childNodes)
         {
             //Debug.Log(node.bounds.center);
             Gizmos.DrawWireCube(node.bounds.center, node.bounds.size);
 
             if (node.childNodes != null)
             {
-                foreach (QctreeNode chileNode in node.childNodes)
+                foreach (QctreeNode<ModelObject> chileNode in node.childNodes)
                 {
                     DrawDebug(chileNode);
                 }

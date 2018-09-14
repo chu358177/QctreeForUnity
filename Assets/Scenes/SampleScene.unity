@@ -269,4 +269,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   go: {fileID: 1344171279784550, guid: 01a1e1e99c145e34fa93c6418bb7e2f9, type: 2}
-  GoNum: 200
+  GoNum: 100
+  isShowQctreeBox: 0
